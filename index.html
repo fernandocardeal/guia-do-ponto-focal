@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal do Ponto Focal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header / Navbar -->
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <h1><span>Portal do </span>Ponto Focal</h1>
+      </div>
+      <nav>
+        <ul>
+          <li>
+            <button class="nav-btn nav-btn-accent" onclick="loadFromFile()">
+              📂 Abrir JSON
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn nav-btn-accent" onclick="saveToFile()">
+              💾 Salvar alterações
+            </button>
+          </li>
+          <li>
+            <button id="nav-visualizar" class="nav-btn nav-active" onclick="showSection('section-visualizar')">
+              Visualizar Cards
+            </button>
+          </li>
+          <li>
+            <button id="nav-cadastrar" class="nav-btn" onclick="openCreateForm()">
+              Cadastrar Card
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div id="app-notice" class="app-notice" role="status" aria-live="polite" hidden></div>
+
+    <!-- Seção 1: Visualização dos Cards -->
+    <section id="section-visualizar" class="view-section active">
+      <div class="section-heading">
+        <div>
+          <p class="section-eyebrow">PONTO FOCAL</p>
+          <h2>Cards cadastrados</h2>
+          <p class="section-description">Consulte e mantenha as informações do portal em um só lugar.</p>
+        </div>
+      </div>
+
+      <div id="file-info-bar" class="file-info-bar">
+        <span>Pronto para uso (Armazenamento Local)</span>
+      </div>
+
+      <div id="main-grid" class="cards-grid"></div>
+    </section>
+
+    <!-- Seção 2: Formulário de Cadastro / Edição -->
+    <section id="section-cadastrar" class="view-section">
+      <div class="form-container">
+        <h2 id="form-title">Cadastrar Novo Card</h2>
+        <form id="card-form">
+          <input type="hidden" id="card-id">
+          <p class="form-description">Preencha os dados na tabela. Use uma linha para cada informação do card.</p>
+
+          <div class="table-container form-table-container">
+            <table class="content-table form-table">
+              <thead>
+                <tr>
+                  <th scope="col">Campo</th>
+                  <th scope="col">Informação</th>
+                </tr>
+              </thead>
+              <tbody id="form-table-body">
+                <tr>
+                  <td class="table-key">Título</td>
+                  <td class="table-val"><input class="table-editor-input" type="text" id="card-title" placeholder="Ex: Informações de Acesso" required></td>
+                </tr>
+                <tr>
+                  <td class="table-key">Legenda / resumo</td>
+                  <td class="table-val"><input class="table-editor-input" type="text" id="card-subtitle" placeholder="Dados de matrícula e horários" required></td>
+                </tr>
+                <tr class="form-table-section-row">
+                  <th colspan="2" scope="colgroup">Informações do card</th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="form-table-actions">
+            <button type="button" class="btn-action btn-edit" onclick="addContentRow()">＋ Adicionar campo</button>
+          </div>
+
+          <div class="form-actions-row">
+            <button type="submit" class="btn-primary" id="btn-save-card">Salvar Card</button>
+            <button type="button" class="btn-cancel" onclick="showSection('section-visualizar')">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Container dinâmico para as páginas de detalhe -->
+    <div id="pages-container"></div>
+
+  </main>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

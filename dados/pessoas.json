@@ -1,0 +1,20 @@
+[
+  {
+    "id": "card-1792121423795",
+    "titulo": "Exemplo 1",
+    "legenda": "Informação importante para destacar",
+    "conteudo": {
+      "CAMPO 1": "Valor",
+      "CAMPO 2": "Valor"
+    }
+  },
+  {
+    "id": "card-1792122628217",
+    "titulo": "Exemplo 2",
+    "legenda": "Informação importante para destacar",
+    "conteudo": {
+      "CAMPO 1": "Valor",
+      "CAMPO 2": "Valor"
+    }
+  }
+]
