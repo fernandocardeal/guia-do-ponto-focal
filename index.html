@@ -14,32 +14,29 @@
       <div class="logo">
         <h1><span>Portal do </span>Ponto Focal</h1>
       </div>
-      <nav>
-        <ul>
-          <li>
-            <button class="nav-btn nav-btn-accent" onclick="loadFromFile()">
-              📂 Abrir JSON
-            </button>
-          </li>
-          <li>
-            <button class="nav-btn nav-btn-accent" onclick="saveToFile()">
-              💾 Salvar alterações
-            </button>
-          </li>
-          <li>
-            <button id="nav-visualizar" class="nav-btn nav-active" onclick="showSection('section-visualizar')">
-              Visualizar Cards
-            </button>
-          </li>
-          <li>
-            <button id="nav-cadastrar" class="nav-btn" onclick="openCreateForm()">
-              Cadastrar Card
-            </button>
-          </li>
-        </ul>
-      </nav>
     </div>
   </header>
+
+  <div class="menu-bar">
+    <nav class="menu-container" aria-label="Menu principal">
+      <ul>
+        <li><button class="nav-btn" onclick="loadFromFile()">Abrir JSON</button></li>
+        <li><button class="nav-btn" onclick="saveToFile()">Salvar alterações</button></li>
+        <li><button id="nav-visualizar" class="nav-btn nav-active" onclick="showSection('section-visualizar')">Visualizar Cards</button></li>
+        <li><button id="nav-cadastrar" class="nav-btn" onclick="openCreateForm()">Cadastrar Card</button></li>
+        <li class="status-menu-item">
+          <button id="status-menu-toggle" class="nav-btn status-menu-toggle" type="button" aria-expanded="false" aria-controls="status-popover"><span>Status</span><span class="status-indicator" aria-hidden="true"></span></button>
+          <div id="status-popover" class="status-popover" role="dialog" aria-label="Status do arquivo" hidden>
+            <h3>Status do arquivo</h3>
+            <div id="file-info-bar" class="file-info-bar">
+              <span>Pronto para uso (Armazenamento Local)</span>
+            </div>
+          </div>
+        </li>
+        <li><button id="theme-toggle" class="nav-btn theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false">Modo escuro</button></li>
+      </ul>
+    </nav>
+  </div>
 
   <main>
     <div id="app-notice" class="app-notice" role="status" aria-live="polite" hidden></div>
@@ -54,11 +51,14 @@
         </div>
       </div>
 
-      <div id="file-info-bar" class="file-info-bar">
-        <span>Pronto para uso (Armazenamento Local)</span>
+      <div class="cards-main">
+        <div class="search-toolbar">
+          <label for="card-search">Buscar cards</label>
+          <input id="card-search" type="search" placeholder="Digite um título, palavra ou informação..." autocomplete="off">
+          <p id="search-results" class="search-results" aria-live="polite"></p>
+        </div>
+        <div id="main-grid" class="cards-grid"></div>
       </div>
-
-      <div id="main-grid" class="cards-grid"></div>
     </section>
 
     <!-- Seção 2: Formulário de Cadastro / Edição -->

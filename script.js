@@ -6,6 +6,41 @@ let localStorageWarning = '';
 let noticeTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('theme-toggle');
+  let savedTheme = 'light';
+  try {
+    savedTheme = localStorage.getItem('minsait_portal_theme') || 'light';
+  } catch (err) {
+    console.warn('Não foi possível ler a preferência de tema:', err);
+  }
+  setTheme(savedTheme === 'dark');
+  if (themeToggle) themeToggle.addEventListener('click', () => {
+    setTheme(document.documentElement.dataset.theme !== 'dark');
+  });
+
+  const statusToggle = document.getElementById('status-menu-toggle');
+  const statusPopover = document.getElementById('status-popover');
+  if (statusToggle && statusPopover) {
+    statusToggle.addEventListener('click', () => {
+      const isOpen = !statusPopover.hidden;
+      statusPopover.hidden = isOpen;
+      statusToggle.setAttribute('aria-expanded', String(!isOpen));
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('.status-menu-item')) {
+        statusPopover.hidden = true;
+        statusToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !statusPopover.hidden) {
+        statusPopover.hidden = true;
+        statusToggle.setAttribute('aria-expanded', 'false');
+        statusToggle.focus();
+      }
+    });
+  }
+
   // Inicialização: carrega os dados salvos no Local Storage ao abrir a página
   loadFromLocalStorage();
 
@@ -13,7 +48,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cardForm) {
     cardForm.addEventListener('submit', handleSaveCard);
   }
+
+  const cardSearch = document.getElementById('card-search');
+  if (cardSearch) cardSearch.addEventListener('input', filterCards);
+
 });
+
+function setTheme(darkMode) {
+  document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) {
+    toggle.textContent = darkMode ? 'Modo claro' : 'Modo escuro';
+    toggle.setAttribute('aria-label', darkMode ? 'Ativar tema claro' : 'Ativar tema escuro');
+    toggle.setAttribute('aria-pressed', String(darkMode));
+  }
+  try {
+    localStorage.setItem('minsait_portal_theme', darkMode ? 'dark' : 'light');
+  } catch (err) {
+    console.warn('Não foi possível salvar a preferência de tema:', err);
+  }
+}
 
 function showNotice(message, type = 'info') {
   const notice = document.getElementById('app-notice');
@@ -263,16 +317,19 @@ function updateFileInfoBar() {
   const fileInfoBar = document.getElementById('file-info-bar');
   if (!fileInfoBar) return;
 
+  const statusToggle = document.getElementById('status-menu-toggle');
+
   const origin = currentLoadedFileName ? escapeHtml(currentLoadedFileName) : 'Armazenamento local';
   const count = `${cardsData.length} card(s)`;
   const statusClass = localStorageWarning ? 'file-state-warning' : hasPendingFileChanges ? 'file-state-pending' : 'file-state-saved';
   const statusText = localStorageWarning || (hasPendingFileChanges
     ? '● Alterações locais pendentes de exportação'
-    : '✓ Sem alterações locais pendentes');
+    : 'Sem alterações locais pendentes');
+  if (statusToggle) statusToggle.dataset.state = localStorageWarning ? 'warning' : hasPendingFileChanges ? 'pending' : 'saved';
 
   fileInfoBar.innerHTML = `
     <div class="file-info-content">
-      <div>📋 Dados de: <strong>${origin}</strong> (${count})</div>
+      <div>Dados de: <strong>${origin}</strong> (${count})</div>
       <span class="${statusClass}">${escapeHtml(statusText)}</span>
       ${cardsData.length === 0 ? '<div class="file-empty-hint">A lista está vazia. Abra um JSON ou cadastre um card.</div>' : ''}
     </div>
@@ -436,30 +493,41 @@ function renderCards() {
         <h3>Sua lista de cards está vazia</h3>
         <p>Cadastre um novo card ou carregue um arquivo JSON do seu computador.</p>
         <button class="btn-primary" style="max-width: 250px; margin: 0 auto;" onclick="openCreateForm()">
-          ➕ Cadastrar Primeiro Card
+          Cadastrar Primeiro Card
         </button>
       </div>
     `;
     return;
   }
 
+  const noResults = document.createElement('div');
+  noResults.className = 'empty-state search-empty-state';
+  noResults.hidden = true;
+  noResults.innerHTML = '<h3>Nenhum card encontrado</h3><p>Tente buscar por outro termo ou limpe o campo de busca.</p>';
+  gridContainer.appendChild(noResults);
+
   cardsData.forEach(card => {
     // 1. Card na Grade Principal
+    const content = typeof card.conteudo === 'string'
+      ? card.conteudo
+      : Object.entries(card.conteudo || {}).flat().join(' ');
+    const searchableText = normalizeSearchText(`${card.titulo} ${card.legenda} ${content}`);
     const cardElement = document.createElement('article');
     cardElement.className = 'card';
+    cardElement.dataset.searchText = searchableText;
     cardElement.innerHTML = `
       <div onclick="openPage('${card.id}')" style="cursor: pointer;">
         <h2>${escapeHtml(card.titulo)}</h2>
         <p>${escapeHtml(card.legenda)}</p>
       </div>
       <div class="card-footer">
-        <span class="link-hint" onclick="openPage('${card.id}')">Acessar conteúdo &rarr;</span>
+        <span class="link-hint" onclick="openPage('${card.id}')">Acessar conteúdo</span>
         <div class="card-actions">
-          <button class="btn-action btn-edit" onclick="openEditForm('${card.id}')" title="Editar Card">✏️ Editar</button>
-          <button class="btn-action btn-delete" onclick="deleteCard('${card.id}')" title="Excluir Card">🗑️ Excluir</button>
+          <button class="btn-action btn-edit" onclick="openEditForm('${card.id}')" title="Editar Card">Editar</button>
+          <button class="btn-action btn-delete" onclick="deleteCard('${card.id}')" title="Excluir Card">Excluir</button>
         </div>
       </div>
-    `;
+      `;
     gridContainer.appendChild(cardElement);
 
     // 2. Página Detalhada com Tabela
@@ -473,15 +541,44 @@ function renderCards() {
       </div>
       
       <div class="detail-footer-actions">
-        <button class="btn-back" onclick="showSection('section-visualizar')">&larr; Voltar para a lista</button>
+        <button class="btn-back" onclick="showSection('section-visualizar')">Voltar para a lista</button>
         <div class="card-actions">
-          <button class="btn-action btn-edit" onclick="openEditForm('${card.id}')">✏️ Editar Card</button>
-          <button class="btn-action btn-delete" onclick="deleteCard('${card.id}')">🗑️ Excluir Card</button>
+          <button class="btn-action btn-edit" onclick="openEditForm('${card.id}')">Editar Card</button>
+          <button class="btn-action btn-delete" onclick="deleteCard('${card.id}')">Excluir Card</button>
         </div>
       </div>
     `;
     pagesContainer.appendChild(pageElement);
   });
+
+  filterCards();
+}
+
+function filterCards() {
+  const gridContainer = document.getElementById('main-grid');
+  const searchInput = document.getElementById('card-search');
+  const resultsLabel = document.getElementById('search-results');
+  if (!gridContainer || !searchInput || !resultsLabel) return;
+
+  const query = normalizeSearchText(searchInput.value);
+  const cards = [...gridContainer.querySelectorAll('.card[data-search-text]')];
+  let visibleCount = 0;
+
+  cards.forEach(card => {
+    const matches = card.dataset.searchText.includes(query);
+    card.hidden = !matches;
+    if (matches) visibleCount += 1;
+  });
+
+  const noResults = gridContainer.querySelector('.search-empty-state');
+  if (noResults) noResults.hidden = visibleCount > 0;
+  resultsLabel.textContent = query
+    ? `${visibleCount} de ${cards.length} cards encontrados`
+    : `${cards.length} card(s) cadastrados`;
+}
+
+function normalizeSearchText(value) {
+  return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR').trim();
 }
 
 // Prepara o formulário para inclusão de novo card
