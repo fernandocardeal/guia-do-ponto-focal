@@ -1,46 +1,68 @@
 # Portal do Ponto Focal
 
-Portal web estático para consultar e manter cards informativos. A interface permite cadastrar, editar e excluir cards, visualizar seus detalhes e importar ou exportar os dados em JSON.
+Um portal leve para organizar, consultar e atualizar informações de pontos focais em cards. A interface funciona no navegador e permite importar e exportar os dados em planilhas Excel.
 
-## Como usar
+## O que você pode fazer
 
-1. Abra `index.html` em um navegador moderno.
-2. Selecione **Abrir JSON** para carregar uma lista de cards.
-3. Consulte os cards ou use **Cadastrar Card** para adicionar um novo.
-4. Use **Salvar alterações** para gravar as mudanças no arquivo associado ou exportar um JSON.
+- Consultar cards em uma grade e abrir os detalhes de cada registro.
+- Cadastrar, editar e excluir cards com campos personalizados.
+- Buscar por título, legenda, nome de campo ou valor.
+- Filtrar cards que contêm uma data de hoje e ordenar pela data encontrada.
+- Alternar entre os temas claro e escuro.
+- Importar uma planilha `.xlsx` ou `.xls` e exportar os cards para `.xlsx`.
 
-As alterações também são mantidas no armazenamento local (`localStorage`) do navegador. Os dados locais não substituem um backup JSON. O portal não carrega automaticamente os arquivos da pasta `dados`.
+## Começar
 
-## Formato dos dados
+O projeto não precisa de instalação nem de etapa de build. Baixe ou clone o repositório e sirva a pasta por um servidor HTTP local. Por exemplo, com Python:
 
-O JSON deve conter uma lista de cards com os campos `id`, `titulo`, `legenda` e `conteudo`. `conteudo` pode ser um objeto de pares chave/valor ou um texto. Exemplo:
-
-```json
-[
-  {
-    "id": "exemplo-1",
-    "titulo": "Informações de acesso",
-    "legenda": "Orientações para a equipe",
-    "conteudo": {
-      "Sistema": "Portal interno",
-      "Acesso": "Solicite autorização à equipe responsável"
-    }
-  }
-]
+```bash
+python -m http.server 8000
 ```
 
-O arquivo `dados/pessoas.json` contém 15 cards de exemplo e pode ser carregado pela opção **Abrir JSON**.
+Depois, abra [http://localhost:8000](http://localhost:8000) no navegador.
 
-## Persistência e compatibilidade
+O portal também pode ser publicado em qualquer hospedagem de arquivos estáticos. A biblioteca usada para Excel é carregada do jsDelivr, então os recursos de importação e exportação dependem de acesso à rede e da disponibilidade desse CDN.
 
-O portal valida os arquivos JSON antes de importá-los. Ao salvar, navegadores compatíveis podem gravar no arquivo escolhido durante a sessão; em outros navegadores, o portal baixa um arquivo JSON. O identificador do arquivo escolhido não é preservado ao recarregar a página, então pode ser necessário selecionar o destino novamente.
+## Importar e exportar Excel
 
-## Arquivos do projeto
+Na importação, o portal lê a **primeira aba** da planilha e considera:
 
-- `index.html`: estrutura e navegação da interface.
-- `style.css`: estilos e layout responsivo.
-- `script.js`: renderização, operações dos cards e importação/exportação.
-- `dados/pessoas.json`: conjunto de dados de exemplo.
-- `GUIA_DO_PROJETO.md`: documentação detalhada de funcionamento e manutenção.
+1. A primeira linha como cabeçalho.
+2. A primeira coluna como título do card.
+3. A segunda coluna como legenda.
+4. As demais colunas como campos e informações do card.
 
-Não há dependências, processo de build ou servidor configurado.
+A importação substitui os cards carregados no portal. Se quiser manter uma cópia dos dados atuais, exporte-os antes de abrir outra planilha. A exportação cria uma planilha `.xlsx` tabular com a união dos campos encontrados nos cards.
+
+Datas reconhecidas em campos de texto, no formato brasileiro, ISO ou serial do Excel, podem ser usadas pelo filtro e pela ordenação. Valores que não forem reconhecidos como data continuam sendo apresentados como texto.
+
+## Dados e privacidade
+
+Os cards e as preferências de tema ficam no `localStorage` do navegador, associados à origem em que o portal foi aberto. Isso significa que os dados não são sincronizados entre pessoas, navegadores ou dispositivos. Limpar os dados do site no navegador também pode removê-los; exporte uma planilha para guardar uma cópia.
+
+Os arquivos em `dados/` são exemplos de dados no repositório. O portal não os carrega automaticamente: para usar uma planilha própria, abra-a pelo botão **Abrir Excel**.
+
+## Estrutura do projeto
+
+```text
+├── index.html                  # Estrutura da interface
+├── style.css                   # Estilos e temas
+├── script.js                   # Comportamento, cards e planilhas
+├── dados/
+│   ├── pessoas.json            # Exemplo de registros
+│   └── vava.json               # Exemplo de conteúdo
+└── contexto/
+    ├── relatorio_projeto.md    # Relatório de leitura do projeto
+    ├── guia_melhorias.md       # Sugestões e estado das melhorias
+    └── conversa_antigravity.md # Registro de discussão técnica
+```
+
+## Tecnologias
+
+- HTML, CSS e JavaScript sem framework.
+- [SheetJS](https://sheetjs.com/) para leitura e geração de arquivos Excel, carregado via CDN.
+- `localStorage` para persistência local no navegador.
+
+## Documentação adicional
+
+Consulte [`contexto/relatorio_projeto.md`](contexto/relatorio_projeto.md) para uma descrição do funcionamento atual e [`contexto/guia_melhorias.md`](contexto/guia_melhorias.md) para o histórico de melhorias discutidas e seu estado.

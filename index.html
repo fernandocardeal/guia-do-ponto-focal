@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal do Ponto Focal</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Biblioteca SheetJS para manipulação de arquivos Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
+
 <body>
 
   <!-- Header / Navbar -->
@@ -20,12 +24,15 @@
   <div class="menu-bar">
     <nav class="menu-container" aria-label="Menu principal">
       <ul>
-        <li><button class="nav-btn" onclick="loadFromFile()">Abrir JSON</button></li>
-        <li><button class="nav-btn" onclick="saveToFile()">Salvar alterações</button></li>
-        <li><button id="nav-visualizar" class="nav-btn nav-active" onclick="showSection('section-visualizar')">Visualizar Cards</button></li>
+        <li><button class="nav-btn" onclick="loadFromFile()">Abrir Excel</button></li>
+        <li><button class="nav-btn" onclick="saveToFile()">Salvar Excel</button></li>
+        <li><button id="nav-visualizar" class="nav-btn nav-active"
+            onclick="showSection('section-visualizar')">Visualizar Cards</button></li>
         <li><button id="nav-cadastrar" class="nav-btn" onclick="openCreateForm()">Cadastrar Card</button></li>
         <li class="status-menu-item">
-          <button id="status-menu-toggle" class="nav-btn status-menu-toggle" type="button" aria-expanded="false" aria-controls="status-popover"><span>Status</span><span class="status-indicator" aria-hidden="true"></span></button>
+          <button id="status-menu-toggle" class="nav-btn status-menu-toggle" type="button" aria-expanded="false"
+            aria-controls="status-popover"><span>Status</span><span class="status-indicator"
+              aria-hidden="true"></span></button>
           <div id="status-popover" class="status-popover" role="dialog" aria-label="Status do arquivo" hidden>
             <h3>Status do arquivo</h3>
             <div id="file-info-bar" class="file-info-bar">
@@ -33,7 +40,8 @@
             </div>
           </div>
         </li>
-        <li><button id="theme-toggle" class="nav-btn theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false">Modo escuro</button></li>
+        <li><button id="theme-toggle" class="nav-btn theme-toggle" type="button" aria-label="Alternar tema"
+            aria-pressed="false">Modo escuro</button></li>
       </ul>
     </nav>
   </div>
@@ -53,8 +61,27 @@
 
       <div class="cards-main">
         <div class="search-toolbar">
-          <label for="card-search">Buscar cards</label>
-          <input id="card-search" type="search" placeholder="Digite um título, palavra ou informação..." autocomplete="off">
+          <div class="search-field">
+            <label for="card-search">Buscar cards</label>
+            <input id="card-search" type="search" placeholder="Digite um título, palavra ou informação..."
+              autocomplete="off">
+          </div>
+          <div class="search-field">
+            <label for="card-date-filter">Filtrar por data</label>
+            <select id="card-date-filter">
+              <option value="all">Todas as datas</option>
+              <option value="today">Contém data de hoje</option>
+              <option value="other">Não contém data de hoje</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label for="card-sort-order">Organizar por data</label>
+            <select id="card-sort-order">
+              <option value="original">Ordem atual</option>
+              <option value="asc">Mais antiga primeiro</option>
+              <option value="desc">Mais recente primeiro</option>
+            </select>
+          </div>
           <p id="search-results" class="search-results" aria-live="polite"></p>
         </div>
         <div id="main-grid" class="cards-grid"></div>
@@ -67,7 +94,8 @@
         <h2 id="form-title">Cadastrar Novo Card</h2>
         <form id="card-form">
           <input type="hidden" id="card-id">
-          <p class="form-description">Preencha os dados na tabela. Use uma linha para cada informação do card.</p>
+          <p class="form-description">Preencha os dados na tabela. A primeira coluna será o Título e a segunda a
+            Legenda.</p>
 
           <div class="table-container form-table-container">
             <table class="content-table form-table">
@@ -79,22 +107,24 @@
               </thead>
               <tbody id="form-table-body">
                 <tr>
-                  <td class="table-key">Título</td>
-                  <td class="table-val"><input class="table-editor-input" type="text" id="card-title" placeholder="Ex: Informações de Acesso" required></td>
+                  <td class="table-key">Título (1ª Coluna)</td>
+                  <td class="table-val"><input class="table-editor-input" type="text" id="card-title"
+                      placeholder="Ex: ADRIANO PEREIRA DA SILVA" required></td>
                 </tr>
                 <tr>
-                  <td class="table-key">Legenda / resumo</td>
-                  <td class="table-val"><input class="table-editor-input" type="text" id="card-subtitle" placeholder="Dados de matrícula e horários" required></td>
+                  <td class="table-key">Legenda (2ª Coluna)</td>
+                  <td class="table-val"><input class="table-editor-input" type="text" id="card-subtitle"
+                      placeholder="Ex: adriano.silva@petrobras.com.br" required></td>
                 </tr>
                 <tr class="form-table-section-row">
-                  <th colspan="2" scope="colgroup">Informações do card</th>
+                  <th colspan="2" scope="colgroup">Informações do card (Demais Colunas)</th>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <div class="form-table-actions">
-            <button type="button" class="btn-action btn-edit" onclick="addContentRow()">＋ Adicionar campo</button>
+            <button type="button" class="btn-action btn-edit" onclick="addContentRow()">Adicionar campo</button>
           </div>
 
           <div class="form-actions-row">
@@ -113,4 +143,5 @@
   <script src="script.js"></script>
 
 </body>
+
 </html>
